@@ -21,7 +21,7 @@ def green_enter():
     fitting_room.acquire()
     print(threading.current_thread().name)
     threadId += 1
-    time.sleep(5)
+    time.sleep(1)
     fitting_room.release()
 
 
@@ -30,7 +30,7 @@ def blue_enter():
     fitting_room.acquire()
     print(threading.current_thread().name)
     threadId += 1
-    time.sleep(5)
+    time.sleep(1)
     fitting_room.release()
 
 
@@ -57,8 +57,8 @@ if __name__ == "__main__":
         blue.start()
         time.sleep(1)
     print("Empty Fitting Room")
-    print("Green Only")
 
+    print("Green Only")
     for j in range(g):
         # create green thread
         green = threading.Thread(
