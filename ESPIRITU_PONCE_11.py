@@ -47,9 +47,9 @@ if __name__ == "__main__":
     global threadId
     threadId = 0
 
-    # create blue thread
     print("Blue Only")
     for i in range(b):
+        # create blue thread
         blue = threading.Thread(
             target=blue_enter, name="Thread ID: " + str(threadId) + " | Color: Blue"
         )
@@ -58,8 +58,9 @@ if __name__ == "__main__":
         time.sleep(1)
     print("Empty Fitting Room")
     print("Green Only")
-    # create green thread
+
     for j in range(g):
+        # create green thread
         green = threading.Thread(
             target=green_enter, name="Thread ID: " + str(threadId) + " | Color: Green"
         )
