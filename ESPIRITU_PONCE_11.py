@@ -21,6 +21,7 @@ def change_thread():
     global ctr, blueCtr, greenCtr, quantum
     global isBlue
 
+    # if there are still green and blue threads to be executed
     if blueCtr < b and greenCtr < g:
         # if quantum reached, switch to other color
         if ctr == quantum:
@@ -30,10 +31,12 @@ def change_thread():
         # else, just increment counter
         else:
             ctr += 1
+    # if there are no more green threads but there are still blue threads to be executed
     elif greenCtr == g and not isBlue:
         ctr = 0
         isBlue = True
         print("------Empty Fitting Room------")
+    # if there are no more blue threads but there are still green threads to be executed
     elif blueCtr == b and isBlue:
         ctr = 0
         isBlue = False
@@ -84,17 +87,16 @@ if __name__ == "__main__":
     isBlue = True
 
     if g < b:
-        # print("----------Green Only----------")
         isBlue = False
-    # else:
-    # print("----------Blue Only----------")
 
     global ctr, blueCtr, greenCtr, quantum
     ctr = blueCtr = greenCtr = 0
     quantum = n + 2
 
+    # run until the number of blue and green threads are reached
     for i in range(b + g):
         if isBlue:
+            # if the blue thread is the first to enter the empty fitting room
             if ctr == 0:
                 print("----------Blue Only----------")
 
@@ -102,10 +104,11 @@ if __name__ == "__main__":
             blue = threading.Thread(
                 target=blue_enter, name="Thread ID: " + str(threadId) + " | Color: Blue"
             )
-            # start blue thread
-            blue.start()
-            blue.join()
+
+            blue.start()  # start blue thread
+            blue.join()  # wait for green thread to finish
         else:
+            # if the green thread is the first to enter the empty fitting room
             if ctr == 0:
                 print("----------Green Only----------")
 
@@ -114,6 +117,6 @@ if __name__ == "__main__":
                 target=green_enter,
                 name="Thread ID: " + str(threadId) + " | Color: Green",
             )
-            # start green thread
-            green.start()
-            green.join()
+
+            green.start()  # start green thread
+            green.join()  # wait for green thread to finish
