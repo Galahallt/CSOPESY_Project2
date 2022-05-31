@@ -16,25 +16,64 @@ import threading
 import time
 
 
+def change_thread():
+    global n, b, g
+    global ctr, blueCtr, greenCtr, quantum
+    global isBlue
+
+    if blueCtr < b and greenCtr < g:
+        # if quantum reached, switch to other color
+        if ctr == quantum:
+            ctr = 0
+            isBlue = not isBlue
+            print("------Empty Fitting Room------")
+        # else, just increment counter
+        else:
+            ctr += 1
+    elif greenCtr == g and not isBlue:
+        ctr = 0
+        isBlue = True
+        print("------Empty Fitting Room------")
+    elif blueCtr == b and isBlue:
+        ctr = 0
+        isBlue = False
+        print("------Empty Fitting Room------")
+    else:
+        ctr = 1
+    # # if non-alternating
+    # else:
+    #     # there are still blue threads to be executed
+    #     if blueCtr < b:
+    #         isBlue = True
+    #     # there are still green threads to be executed
+    #     else:
+    #         isBlue = False
+
+
 def green_enter():
-    global threadId, fitting_room
+    global threadId, fitting_room, greenCtr
     fitting_room.acquire()
     print(threading.current_thread().name)
     threadId += 1
+    greenCtr += 1
+    change_thread()
     time.sleep(1)
     fitting_room.release()
 
 
 def blue_enter():
-    global threadId, fitting_room
+    global threadId, fitting_room, blueCtr
     fitting_room.acquire()
     print(threading.current_thread().name)
     threadId += 1
+    blueCtr += 1
+    change_thread()
     time.sleep(1)
     fitting_room.release()
 
 
 if __name__ == "__main__":
+    global n, b, g
     n, b, g = list(
         map(int, input("Enter 3 space-separated integers (n, b, g): ").split())
     )
@@ -50,19 +89,18 @@ if __name__ == "__main__":
     global isBlue
     isBlue = True
 
-    if (g < b):
+    if g < b:
         # print("----------Green Only----------")
         isBlue = False
     # else:
-        # print("----------Blue Only----------")
+    # print("----------Blue Only----------")
 
-    ctr = 0
-    blueCtr = 0
-    greenCtr = 0
+    global ctr, blueCtr, greenCtr, quantum
+    ctr = blueCtr = greenCtr = 0
     quantum = 2
 
     for i in range(b + g):
-        if isBlue and blueCtr < b:
+        if isBlue:
             if ctr == 0:
                 print("----------Blue Only----------")
 
@@ -73,63 +111,15 @@ if __name__ == "__main__":
             # start blue thread
             blue.start()
             time.sleep(1)
-
-            blueCtr+=1
         else:
             if ctr == 0:
                 print("----------Green Only----------")
 
             # create green thread
             green = threading.Thread(
-                target=green_enter, name="Thread ID: " + str(threadId) + " | Color: Green"
+                target=green_enter,
+                name="Thread ID: " + str(threadId) + " | Color: Green",
             )
             # start green thread
             green.start()
             time.sleep(1)
-
-            greenCtr+=1
-        
-        # if quantum reached, switch to other color
-        if ctr == quantum:
-            # if alternating
-            if blueCtr < b and greenCtr < g:
-                ctr = 0
-                isBlue = not isBlue
-                print("------Empty Fitting Room------")
-
-            # if non-alternating
-            else:
-                if blueCtr < b:
-                    isBlue = True
-                else:
-                    isBlue = False
-
-        # else, just increment counter
-        else:
-            ctr+=1
-    
-    print("------Empty Fitting Room------")
-    # print(fitting_room.__dict__)
-        
-
-    # print("----------Blue Only----------")
-    # for i in range(b):
-    #     # create blue thread
-    #     blue = threading.Thread(
-    #         target=blue_enter, name="Thread ID: " + str(threadId) + " | Color: Blue"
-    #     )
-    #     # start blue thread
-    #     blue.start()
-    #     time.sleep(1)
-    # print("------Empty Fitting Room------")
-
-    # print("----------Green Only----------")
-    # for j in range(g):
-    #     # create green thread
-    #     green = threading.Thread(
-    #         target=green_enter, name="Thread ID: " + str(threadId) + " | Color: Green"
-    #     )
-    #     # start green thread
-    #     green.start()
-    #     time.sleep(1)
-    # print("------Empty Fitting Room------")
