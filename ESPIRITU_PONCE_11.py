@@ -56,8 +56,9 @@ def green_enter():
     print(threading.current_thread().name)
     threadId += 1
     greenCtr += 1
+    print(threading.active_count())
     change_thread()
-    time.sleep(1)
+    time.sleep(0.1)
     fitting_room.release()
 
 
@@ -67,8 +68,9 @@ def blue_enter():
     print(threading.current_thread().name)
     threadId += 1
     blueCtr += 1
+    print(threading.active_count())
     change_thread()
-    time.sleep(1)
+    time.sleep(0.1)
     fitting_room.release()
 
 
@@ -110,7 +112,7 @@ if __name__ == "__main__":
             )
             # start blue thread
             blue.start()
-            time.sleep(1)
+            blue.join()
         else:
             if ctr == 0:
                 print("----------Green Only----------")
@@ -122,4 +124,4 @@ if __name__ == "__main__":
             )
             # start green thread
             green.start()
-            time.sleep(1)
+            green.join()
