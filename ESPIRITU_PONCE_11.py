@@ -47,24 +47,89 @@ if __name__ == "__main__":
     global threadId
     threadId = 0
 
-    print("----------Blue Only----------")
-    for i in range(b):
-        # create blue thread
-        blue = threading.Thread(
-            target=blue_enter, name="Thread ID: " + str(threadId) + " | Color: Blue"
-        )
-        # start blue thread
-        blue.start()
-        time.sleep(1)
-    print("------Empty Fitting Room------")
+    global isBlue
+    isBlue = True
 
-    print("----------Green Only----------")
-    for j in range(g):
-        # create green thread
-        green = threading.Thread(
-            target=green_enter, name="Thread ID: " + str(threadId) + " | Color: Green"
-        )
-        # start green thread
-        green.start()
-        time.sleep(1)
+    if (g < b):
+        # print("----------Green Only----------")
+        isBlue = False
+    # else:
+        # print("----------Blue Only----------")
+
+    ctr = 0
+    blueCtr = 0
+    greenCtr = 0
+    quantum = 2
+
+    for i in range(b + g):
+        if isBlue and blueCtr < b:
+            if ctr == 0:
+                print("----------Blue Only----------")
+
+            # create blue thread
+            blue = threading.Thread(
+                target=blue_enter, name="Thread ID: " + str(threadId) + " | Color: Blue"
+            )
+            # start blue thread
+            blue.start()
+            time.sleep(1)
+
+            blueCtr+=1
+        else:
+            if ctr == 0:
+                print("----------Green Only----------")
+
+            # create green thread
+            green = threading.Thread(
+                target=green_enter, name="Thread ID: " + str(threadId) + " | Color: Green"
+            )
+            # start green thread
+            green.start()
+            time.sleep(1)
+
+            greenCtr+=1
+        
+        # if quantum reached, switch to other color
+        if ctr == quantum:
+            # if alternating
+            if blueCtr < b and greenCtr < g:
+                ctr = 0
+                isBlue = not isBlue
+                print("------Empty Fitting Room------")
+
+            # if non-alternating
+            else:
+                if blueCtr < b:
+                    isBlue = True
+                else:
+                    isBlue = False
+
+        # else, just increment counter
+        else:
+            ctr+=1
+    
     print("------Empty Fitting Room------")
+    # print(fitting_room.__dict__)
+        
+
+    # print("----------Blue Only----------")
+    # for i in range(b):
+    #     # create blue thread
+    #     blue = threading.Thread(
+    #         target=blue_enter, name="Thread ID: " + str(threadId) + " | Color: Blue"
+    #     )
+    #     # start blue thread
+    #     blue.start()
+    #     time.sleep(1)
+    # print("------Empty Fitting Room------")
+
+    # print("----------Green Only----------")
+    # for j in range(g):
+    #     # create green thread
+    #     green = threading.Thread(
+    #         target=green_enter, name="Thread ID: " + str(threadId) + " | Color: Green"
+    #     )
+    #     # start green thread
+    #     green.start()
+    #     time.sleep(1)
+    # print("------Empty Fitting Room------")
