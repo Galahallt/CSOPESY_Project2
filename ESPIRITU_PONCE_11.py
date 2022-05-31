@@ -40,14 +40,6 @@ def change_thread():
         print("------Empty Fitting Room------")
     else:
         ctr = 1
-    # # if non-alternating
-    # else:
-    #     # there are still blue threads to be executed
-    #     if blueCtr < b:
-    #         isBlue = True
-    #     # there are still green threads to be executed
-    #     else:
-    #         isBlue = False
 
 
 def green_enter():
@@ -99,7 +91,7 @@ if __name__ == "__main__":
 
     global ctr, blueCtr, greenCtr, quantum
     ctr = blueCtr = greenCtr = 0
-    quantum = 2
+    quantum = n + 2
 
     for i in range(b + g):
         if isBlue:
