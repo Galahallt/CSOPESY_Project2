@@ -51,7 +51,6 @@ def green_enter():
     print(threading.current_thread().name)
     threadId += 1
     greenCtr += 1
-    print(threading.active_count())
     change_thread()
     time.sleep(0.1)
     fitting_room.release()
@@ -63,7 +62,6 @@ def blue_enter():
     print(threading.current_thread().name)
     threadId += 1
     blueCtr += 1
-    print(threading.active_count())
     change_thread()
     time.sleep(0.1)
     fitting_room.release()
