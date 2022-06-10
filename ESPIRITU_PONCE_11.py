@@ -130,6 +130,3 @@ for i in range(b + g):
         )
         threads.append(green)
         green.start()
-
-for thread in threads:
-    thread.join()
