@@ -14,6 +14,7 @@ __version__ = "1.0"
 
 import threading
 import time
+import logging
 
 
 def change_thread():
@@ -50,29 +51,106 @@ def change_thread():
     #         isBlue = False
 
 
-def green_enter():
-    global threadId, fitting_room, greenCtr
-    fitting_room.acquire()
-    print(threading.current_thread().name)
-    threadId += 1
-    greenCtr += 1
-    change_thread()
-    time.sleep(1)
-    fitting_room.release()
+# def green_enter():
+#     global fitting_room, greenCtr
+#     fitting_room.acquire()
+
+#     print(threading.current_thread().name)
+
+#     # threadId += 1
+#     greenCtr += 1
+
+#     change_thread()
+#     time.sleep(1)
+
+#     fitting_room.release()
 
 
+# def blue_enter():
+#     global fitting_room, blueCtr
+#     fitting_room.acquire()
+
+#     print(threading.current_thread().name)
+
+#     # threadId += 1
+#     blueCtr += 1
+
+#     change_thread()
+#     time.sleep(1)
+
+#     fitting_room.release()
+
+# def thread_function():
+    # logging.info("Tread Starting: " + threading.current_thread().name)
+    # time.sleep(2) # do work
+    # logging.info("Tread Finishing: " + threading.current_thread().name)
+    
 def blue_enter():
-    global threadId, fitting_room, blueCtr
+    global fitting_room, blue_threads, blue_lock, green_lock
+    global blue_exec_ctr, n, b, slot
+
+    # if no locks claimed, claim blue lock
+    if not(blue_lock.locked()) and not(green_lock.locked()):
+        blue_lock.acquire()
+        print("Blue Only")
+
+    # while green lock is claimed, do nothing
+    while green_lock.locked():
+        pass
+
+    # enter fitting room
     fitting_room.acquire()
     print(threading.current_thread().name)
-    threadId += 1
-    blueCtr += 1
-    change_thread()
+    time.sleep(1)   # do something
+
+    # leave fitting room
+    fitting_room.release()
+    blue_threads.pop()
+    blue_exec_ctr += 1
+    slot += 1
+
+    # if last in fitting room, give room to green
+    if slot == n or blue_exec_ctr == b:
+        blue_lock.release()
+        green_lock.acquire()
+        slot = 0
+        print("Empty Fitting Room")
+        print("Green Only")
+    
+def green_enter():
+    global fitting_room, blue_threads, blue_lock, green_lock
+    global green_exec_ctr, n, g, slot
+    
+    if not(blue_lock.locked()) and not(green_lock.locked()):
+        green_lock.acquire()
+        print("Green Only")
+
+    while blue_lock.locked():
+        pass
+
+    fitting_room.acquire()
+    print(threading.current_thread().name)
     time.sleep(1)
     fitting_room.release()
+    green_threads.pop()
+
+    green_exec_ctr += 1
+    slot += 1
+
+    if slot == n or green_exec_ctr == g:
+        green_lock.release()
+        blue_lock.acquire()
+        slot = 0
+        print("Empty Fitting Room")
+        print("Blue Only")
 
 
 if __name__ == "__main__":
+    # for logging
+    format = "%(asctime)s: %(message)s"
+    logging.basicConfig(format=format, level=logging.INFO,
+                        datefmt="%H:%M:%S")
+
     global n, b, g
     n, b, g = list(
         map(int, input("Enter 3 space-separated integers (n, b, g): ").split())
@@ -82,44 +160,29 @@ if __name__ == "__main__":
     global fitting_room
     fitting_room = threading.BoundedSemaphore(value=n)
 
-    # initialize id of thread
-    global threadId
-    threadId = 0
+    # blue-green restriction lock
+    global blue_lock, green_lock
+    blue_lock = threading.Lock()
+    green_lock = threading.Lock()
 
-    global isBlue
-    isBlue = True
+    global blue_exec_ctr, green_exec_ctr, slot
+    blue_exec_ctr = green_exec_ctr = slot = n
 
-    if g < b:
-        # print("----------Green Only----------")
-        isBlue = False
-    # else:
-    # print("----------Blue Only----------")
+    # list of threads
+    global blue_threads, green_threads
+    blue_threads = list()
+    green_threads = list()
 
-    global ctr, blueCtr, greenCtr, quantum
-    ctr = blueCtr = greenCtr = 0
-    quantum = 2
-
-    for i in range(b + g):
-        if isBlue:
-            if ctr == 0:
-                print("----------Blue Only----------")
-
-            # create blue thread
-            blue = threading.Thread(
-                target=blue_enter, name="Thread ID: " + str(threadId) + " | Color: Blue"
-            )
-            # start blue thread
-            blue.start()
-            time.sleep(1)
+    # create & run threads
+    for i in range (b + g):
+        x = None
+        if (i < b):
+            x = threading.Thread(target=blue_enter, name="Thread ID: " + str(i) + " | Color: Blue")
+            blue_threads.append(x)
         else:
-            if ctr == 0:
-                print("----------Green Only----------")
-
-            # create green thread
-            green = threading.Thread(
-                target=green_enter,
-                name="Thread ID: " + str(threadId) + " | Color: Green",
-            )
-            # start green thread
-            green.start()
-            time.sleep(1)
+            x = threading.Thread(target=green_enter, name="Thread ID: " + str(i) + " | Color: Green")
+            green_threads.append(x)
+        
+        x.start()
+    
+    # print(len(thread_list))
