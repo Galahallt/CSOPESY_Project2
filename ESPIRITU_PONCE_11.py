@@ -42,11 +42,9 @@ def green_enter():
         print("------Empty Fitting Room------")
         green_access.release()
 
-        while True:
-            if (blue_access.locked() and blueCtr) < b or (
-                blueCtr == b and greenCtr == 0
-            ):
-                break
+    while True:
+        if (blue_access.locked() and blueCtr < b) or (blueCtr == b and greenCtr == g):
+            break
 
 
 def blue_enter():
@@ -75,11 +73,9 @@ def blue_enter():
         print("------Empty Fitting Room------")
         blue_access.release()
 
-        while True:
-            if (green_access.locked() and blueCtr) < b or (
-                blueCtr == b and greenCtr == 0
-            ):
-                break
+    while True:
+        if (green_access.locked() and blueCtr < b) or (blueCtr == b and greenCtr == g):
+            break
 
 
 n, b, g = list(map(int, input("Enter 3 space-separated integers (n, b, g): ").split()))
