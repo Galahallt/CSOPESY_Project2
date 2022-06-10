@@ -12,7 +12,6 @@ __date__ = "2022/05/30"
 __license__ = "MIT"
 __version__ = "1.0"
 
-from concurrent.futures import thread
 import threading
 import time
 
