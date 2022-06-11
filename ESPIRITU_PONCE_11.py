@@ -14,6 +14,7 @@ __version__ = "1.0"
 import threading
 import time
 
+
 def blue_enter():
     global fitting_room, blue_semaphore, green_semaphore, blue_room_mutex, green_room_mutex
     global blue_exec_ctr, green_exec_ctr, b, g, quantum
@@ -24,7 +25,7 @@ def blue_enter():
     # wait for green mutex lock to be released
     while green_room_mutex.locked():
         pass
-    
+
     # if blue mutex lock is not yet acquired, acquire it.
     if not blue_room_mutex.locked():
         # acquire blue mutex lock
@@ -40,7 +41,7 @@ def blue_enter():
 
     # do something
     time.sleep(1)
-    
+
     # acquire blue counter mutex lock
     blue_ctr_mutex.acquire()
     # +1 blue thread executed
@@ -79,7 +80,7 @@ def blue_enter():
 
     # release the acquired fitting room lock / semaphore value
     fitting_room.release()
-    
+
     # if no green thread is waiting anymore,
     if green_exec_ctr >= g:
         # then just release locks for other blue threads
@@ -96,7 +97,7 @@ def green_enter():
     # wait for blue mutex lock to be reelased
     while blue_room_mutex.locked():
         pass
-    
+
     # if green mutex lock is not yet acquired, acquire it.
     if not green_room_mutex.locked():
         # acquire green mutex lock
@@ -109,7 +110,7 @@ def green_enter():
 
     # display thread details
     print(threading.current_thread().name)
-    
+
     # do something
     time.sleep(1)
 
@@ -133,7 +134,7 @@ def green_enter():
     # if all green threads are done executing already OR
     # quantum has been reached AND there are still blue threads waiting
     if (green_exec_ctr % quantum == 0 and blue_exec_ctr <= b) or green_exec_ctr == g:
-        
+
         # if there are blue threads waiting,
         if blue_exec_ctr < b:
             # release semaphores for blue threads
@@ -151,11 +152,12 @@ def green_enter():
 
     # release the acquired fitting room lock / semaphore value
     fitting_room.release()
-    
+
     # if no blue thread is waiting anymore,
     if blue_exec_ctr >= b:
         # then just release locks for other green threads
         green_semaphore.release()
+
 
 # ask for input
 n, b, g = list(map(int, input("Enter 3 space-separated integers (n, b, g): ").split()))
@@ -206,5 +208,6 @@ for i in range(b + g):
         threads.append(green)
         green.start()
 
+# wait until the blue and green threads terminate
 for thread in threads:
     thread.join()
