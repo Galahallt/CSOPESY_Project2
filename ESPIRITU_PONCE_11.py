@@ -14,10 +14,6 @@ __version__ = "1.0"
 import threading
 import time
 
-from math import *
-
-    # print(threading.current_thread().name)
-
 def blue_enter():
     global fitting_room, blue_semaphore, green_semaphore, blue_room_mutex, green_room_mutex
     global blue_exec_ctr, green_exec_ctr, b, g, quantum
@@ -31,9 +27,17 @@ def blue_enter():
     
     if not blue_room_mutex.locked():
         blue_room_mutex.acquire()
+        # indicate that the waiting room is for blue threads only
+        print("Blue Only.")
 
     # request for access into the room
     fitting_room.acquire()
+
+    # display thread details
+    print(threading.current_thread().name)
+
+    # do something
+    time.sleep(1)
     
     # +1 blue thread executed
     blue_ctr_mutex.acquire()
@@ -41,8 +45,6 @@ def blue_enter():
 
     # if first blue process and there are green threads waiting,
     if blue_exec_ctr % quantum == 1 and green_exec_ctr <= g:
-        # indicate that the waiting room is for blue threads only
-        print("Blue Only.")
 
         # if all green threads has been executed already,
         if green_exec_ctr == g:
@@ -53,12 +55,10 @@ def blue_enter():
             green_exec_ctr += 1
             green_ctr_mutex.release()
 
-    # display thread details
-    print(threading.current_thread().name)
-
     # if done already (quantum is met OR no blue threads left) AND
     # there are green threads waiting OR this is the last blue thread
-    if (blue_exec_ctr % quantum == 0 or blue_exec_ctr == b) and (green_exec_ctr <= g or blue_exec_ctr == b):
+    # if (blue_exec_ctr % quantum == 0 or blue_exec_ctr == b) and (green_exec_ctr <= g or blue_exec_ctr == b):
+    if (blue_exec_ctr % quantum == 0 and green_exec_ctr <= g) or blue_exec_ctr == b:
 
         # if there are green threads waiting,
         if green_exec_ctr < g:
@@ -66,14 +66,11 @@ def blue_enter():
             for i in range(quantum):
                 green_semaphore.release()
 
-        blue_room_mutex.release()
+            blue_room_mutex.release()
         print("Empty room.")
 
     # release blue_ctr_mutex lock
     blue_ctr_mutex.release()
-
-    # do something
-    time.sleep(1)
 
     # release the acquired fitting room lock / semaphore value
     fitting_room.release()
@@ -97,9 +94,17 @@ def green_enter():
     
     if not green_room_mutex.locked():
         green_room_mutex.acquire()
+        # indicate that the waiting room is for green threads only
+        print("Green Only.")
 
     # request for access into the room
     fitting_room.acquire()
+
+    # display thread details
+    print(threading.current_thread().name)
+    
+    # do something
+    time.sleep(1)
 
     # +1 green thread executed
     green_ctr_mutex.acquire()
@@ -107,8 +112,6 @@ def green_enter():
 
     # if first green process and there are blue threads waiting,
     if green_exec_ctr % quantum == 1 and blue_exec_ctr <= b:
-        # indicate that the waiting room is for green threads only
-        print("Green Only.")
 
         # if all blue threads has been executed already,
         if blue_exec_ctr == b:
@@ -119,12 +122,10 @@ def green_enter():
             blue_exec_ctr += 1
             blue_ctr_mutex.release()
 
-    # display thread details
-    print(threading.current_thread().name)
-
     # if done already (quantum is met OR no green threads left) AND
     # there are blue threads waiting OR this is the last green thread
-    if (green_exec_ctr % quantum == 0 or green_exec_ctr == g) and (blue_exec_ctr <= b or green_exec_ctr == g):
+    # if (green_exec_ctr % quantum == 0 or green_exec_ctr == g) and (blue_exec_ctr <= b or green_exec_ctr == g):
+    if (green_exec_ctr % quantum == 0 and blue_exec_ctr <= b) or green_exec_ctr == g:
         
         # if there are blue threads waiting,
         if blue_exec_ctr < b:
@@ -132,14 +133,11 @@ def green_enter():
             for i in range(quantum):
                 blue_semaphore.release()
 
-        green_room_mutex.release()
+            green_room_mutex.release()
         print("Empty room.")
 
     # release green_ctr_mutex lock
     green_ctr_mutex.release()
-    
-    # do something
-    time.sleep(1)
 
     # release the acquired fitting room lock / semaphore value
     fitting_room.release()
@@ -148,12 +146,6 @@ def green_enter():
     if blue_exec_ctr >= b:
         # then just release locks for other green threads
         green_semaphore.release()
-
-
-"""
-(1) 3 7 11, 3 2 4 test case
-(2) Random printing
-"""
 
 n, b, g = list(map(int, input("Enter 3 space-separated integers (n, b, g): ").split()))
 
