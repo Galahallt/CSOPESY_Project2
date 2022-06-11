@@ -18,11 +18,19 @@ import time
     # print(threading.current_thread().name)
 
 def blue_enter():
-    global fitting_room, blue_access, green_access
+    global fitting_room, blue_access, green_access, blue_lock, green_lock
     global blueCtr, greenCtr, b, g, quantum
 
     # request for blue access into the room
     blue_access.acquire()
+
+    # blue_lock
+    while green_lock.locked():
+        pass
+    
+    if not blue_lock.locked():
+        blue_lock.acquire()
+
     # request for access into the room
     fitting_room.acquire()
     
@@ -47,9 +55,15 @@ def blue_enter():
     # display thread details
     print(threading.current_thread().name)
 
-    # print("                                                       [" + str(blueCtr) + " % " + str(quantum) + " == 0 or " + str(blueCtr) + " > " + str(b) + " and " + str(greenCtr) + " <= " + str(g) + "]")
-    if (blueCtr % quantum == 0 or blueCtr > b) and (greenCtr <= g or blueCtr >= b):
+    if (blueCtr % quantum == 0 or blueCtr == b) and (greenCtr <= g or blueCtr >= b):
+        
+        if blueCtr == b and green_access._value < quantum:
+            for i in range(quantum - green_access._value):
+                green_access.release()
+
+        blue_lock.release()
         print("Empty room.")
+
 
     blue_ctr_access.release()
 
@@ -58,7 +72,7 @@ def blue_enter():
 
     
     # do something
-    time.sleep(0.5)
+    time.sleep(1)
 
     # release the acquired fitting room lock / semaphore value
     fitting_room.release()
@@ -74,11 +88,19 @@ def blue_enter():
 
 
 def green_enter():
-    global fitting_room, blue_access, green_access
+    global fitting_room, blue_access, green_access, blue_lock, green_lock
     global blueCtr, greenCtr, b, g, quantum
 
     # request for green access into the room
     green_access.acquire()
+
+    # green_lock
+    while blue_lock.locked():
+        pass
+    
+    if not green_lock.locked():
+        green_lock.acquire()
+
     # request for access into the room
     fitting_room.acquire()
 
@@ -103,14 +125,18 @@ def green_enter():
     # display thread details
     print(threading.current_thread().name)
 
-    # print("                                                       [" + str(greenCtr) + " % " + str(quantum) + " == 0 or " + str(greenCtr) + " > " + str(g) + " and " + str(blueCtr) + " <= " + str(b) + "]")
-    if (greenCtr % quantum == 0 or greenCtr > g) and (blueCtr <= b or greenCtr >= g):
+    if (greenCtr % quantum == 0 or greenCtr == g) and (blueCtr <= b or greenCtr >= g):
+        if greenCtr == g and blue_access._value < quantum:
+            for i in range(quantum - blue_access._value):
+                blue_access.release()
+
+        green_lock.release()
         print("Empty room.")
 
     green_ctr_access.release()
     
     # do something
-    time.sleep(0.5)
+    time.sleep(1)
 
     # release the acquired fitting room lock / semaphore value
     fitting_room.release()
@@ -124,6 +150,10 @@ def green_enter():
         green_access.release()
 
 
+"""
+(1) 3 7 11, 3 2 4 test case
+(2) Random printing
+"""
 
 n, b, g = list(map(int, input("Enter 3 space-separated integers (n, b, g): ").split()))
 
@@ -144,6 +174,9 @@ greenCtr = blueCtr = 0
 
 blue_ctr_access = threading.Lock()
 green_ctr_access = threading.Lock()
+
+blue_lock = threading.Lock()
+green_lock = threading.Lock()
 
 threads = []
 
