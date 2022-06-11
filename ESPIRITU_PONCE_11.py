@@ -29,7 +29,6 @@ def blue_enter():
     # +1 blue thread executed
     blue_ctr_access.acquire()
     blueCtr += 1
-    blue_ctr_access.release()
 
     # if first blue process and there are green threads waiting,
     if blueCtr % quantum == 1 and greenCtr <= g:
@@ -45,11 +44,18 @@ def blue_enter():
             greenCtr += 1
             green_ctr_access.release()
 
+    # display thread details
+    print(threading.current_thread().name)
+
+    # print("                                                       [" + str(blueCtr) + " % " + str(quantum) + " == 0 or " + str(blueCtr) + " > " + str(b) + " and " + str(greenCtr) + " <= " + str(g) + "]")
+    if (blueCtr % quantum == 0 or blueCtr > b) and (greenCtr <= g or blueCtr >= b):
+        print("Empty room.")
+
+    blue_ctr_access.release()
+
     # if blueCtr % quantum == 0 or blueCtr >= b:
     #     print("Empty fitting room.")
 
-    # display thread details
-    print(threading.current_thread().name)
     
     # do something
     time.sleep(0.5)
@@ -79,7 +85,6 @@ def green_enter():
     # +1 green thread executed
     green_ctr_access.acquire()
     greenCtr += 1
-    green_ctr_access.release()
 
     # if first green process and there are blue threads waiting,
     if greenCtr % quantum == 1 and blueCtr <= b:
@@ -95,11 +100,14 @@ def green_enter():
             blueCtr += 1
             blue_ctr_access.release()
 
-    # if greenCtr % quantum == 0 or greenCtr >= g:
-    #     print("Empty fitting room.")
-    
     # display thread details
     print(threading.current_thread().name)
+
+    # print("                                                       [" + str(greenCtr) + " % " + str(quantum) + " == 0 or " + str(greenCtr) + " > " + str(g) + " and " + str(blueCtr) + " <= " + str(b) + "]")
+    if (greenCtr % quantum == 0 or greenCtr > g) and (blueCtr <= b or greenCtr >= g):
+        print("Empty room.")
+
+    green_ctr_access.release()
     
     # do something
     time.sleep(0.5)
