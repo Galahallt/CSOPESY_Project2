@@ -15,10 +15,68 @@ __version__ = "1.0"
 import threading
 import time
 
+    # print(threading.current_thread().name)
 
 def blue_enter():
+    global fitting_room, blue_access, green_access
+    global blueCtr, greenCtr, b, g, quantum
+
+    blue_access.acquire()
+    fitting_room.acquire()
+    
+    blue_ctr_access.acquire()
+    blueCtr += 1
+    blue_ctr_access.release()
+
+    if blueCtr % quantum == 1 and greenCtr <= g:
+        # print("Empty fitting room.")
+        print("Blue Only.")
+
+        if greenCtr == g:
+            green_ctr_access.acquire()
+            greenCtr += 1
+            green_ctr_access.release()
+
+    print(threading.current_thread().name)
+
+    time.sleep(0.5)
+    fitting_room.release()
+
+    if greenCtr < g:
+        green_access.release()
+    else:
+        blue_access.release()
+
 
 def green_enter():
+    global fitting_room, blue_access, green_access
+    global blueCtr, greenCtr, b, g, quantum
+
+    green_access.acquire()
+    fitting_room.acquire()
+
+    green_ctr_access.acquire()
+    greenCtr += 1
+    green_ctr_access.release()
+
+    if greenCtr % quantum == 1 and blueCtr <= b:
+        # print("Empty fitting room.")
+        print("Green Only.")
+
+        if blueCtr == b:
+            blue_ctr_access.acquire()
+            blueCtr += 1
+            blue_ctr_access.release()
+    
+    print(threading.current_thread().name)
+    
+    time.sleep(0.5)
+    fitting_room.release()
+
+    if blueCtr < b:
+        blue_access.release()
+    else:
+        green_access.release()
 
 
 n, b, g = list(map(int, input("Enter 3 space-separated integers (n, b, g): ").split()))
@@ -28,12 +86,20 @@ fitting_room = threading.BoundedSemaphore(value=n)
 
 print(fitting_room.__dict__)
 
-green_access = threading.Lock()
-blue_access = threading.Lock()
+# green_access = threading.Lock()
+# blue_access = threading.Lock()
 
-quantum = n + 2
+quantum = n
+
+blue_access = threading.Semaphore(value=quantum)
+green_access = threading.Semaphore(value=0)
+
+print(blue_access.__dict__)
 
 greenCtr = blueCtr = 0
+
+blue_ctr_access = threading.Lock()
+green_ctr_access = threading.Lock()
 
 threads = []
 
