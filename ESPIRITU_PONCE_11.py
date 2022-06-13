@@ -14,7 +14,6 @@ __version__ = "1.0"
 import threading
 import time
 
-
 def blue_enter():
     global fitting_room, blue_semaphore, green_semaphore, blue_room_mutex, green_room_mutex
     global blue_exec_ctr, green_exec_ctr, b, g, quantum
@@ -86,7 +85,6 @@ def blue_enter():
         # then just release locks for other blue threads
         blue_semaphore.release()
 
-
 def green_enter():
     global fitting_room, blue_semaphore, green_semaphore, blue_room_mutex, green_room_mutex
     global blue_exec_ctr, green_exec_ctr, b, g, quantum
@@ -157,7 +155,6 @@ def green_enter():
     if blue_exec_ctr >= b:
         # then just release locks for other green threads
         green_semaphore.release()
-
 
 # ask for input
 n, b, g = list(map(int, input("Enter 3 space-separated integers (n, b, g): ").split()))
