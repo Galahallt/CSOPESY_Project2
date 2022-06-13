@@ -187,7 +187,7 @@ elif g < b:
     green_semaphore = threading.Semaphore(value=quantum)
 # else,
 else:
-    print("Invalid Input! There must be at least one green or blue thread!")
+    print("Invalid input! There must be at least one green or blue thread!")
 
 # set counters for no. of blue and green threads that finished executing
 green_exec_ctr = blue_exec_ctr = 0
