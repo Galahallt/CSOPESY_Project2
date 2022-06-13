@@ -50,7 +50,7 @@ def blue_enter():
     if blue_exec_ctr % quantum == 1 and green_exec_ctr <= g:
 
         # if all green threads has been executed already,
-        if green_exec_ctr == g:
+        if green_exec_ctr == g and g > 0:
             # then +1 for green_exec_ctr to avoid printing "Blue Only."
             # when blue threads are no longer giving the room to
             # green threads
@@ -121,7 +121,7 @@ def green_enter():
     if green_exec_ctr % quantum == 1 and blue_exec_ctr <= b:
 
         # if all blue threads has been executed already,
-        if blue_exec_ctr == b:
+        if blue_exec_ctr == b and b > 0:
             # then +1 for blue_exec_ctr to avoid printing "Green Only."
             # when green threads are no longer giving the room to
             # blue threads
@@ -165,16 +165,29 @@ fitting_room = threading.BoundedSemaphore(value=n)
 # limit value per "turn"
 quantum = n
 
-# if there are more green threads than blue threads,
-if b < g:
-    # blue threads goes first
+# if there are no green threads,
+if b > 0 and g == 0:
+    # just execute the blue threads
     blue_semaphore = threading.Semaphore(value=quantum)
     green_semaphore = threading.Semaphore(value=0)
-# else,
-else:
-    # green threads goes first
+# if there are no blue threads, 
+elif g > 0 and b == 0:
+    # just execute the green threads
     blue_semaphore = threading.Semaphore(value=0)
     green_semaphore = threading.Semaphore(value=quantum)
+# if there are more green threads than blue threads,
+elif b < g:
+    # then blue threads goes first
+    blue_semaphore = threading.Semaphore(value=quantum)
+    green_semaphore = threading.Semaphore(value=0)
+# if there are more blue threads than green threads,
+elif g < b:
+    # then green threads goes first
+    blue_semaphore = threading.Semaphore(value=0)
+    green_semaphore = threading.Semaphore(value=quantum)
+# else,
+else:
+    print("Invalid Input! There must be at least one green or blue thread!")
 
 # set counters for no. of blue and green threads that finished executing
 green_exec_ctr = blue_exec_ctr = 0
@@ -206,5 +219,5 @@ for i in range(b + g):
         green.start()
 
 # wait until the blue and green threads terminate
-for thread in threads:
-    thread.join()
+# for thread in threads:
+#     thread.join()
