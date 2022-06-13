@@ -185,6 +185,11 @@ elif g < b:
     # then green threads goes first
     blue_semaphore = threading.Semaphore(value=0)
     green_semaphore = threading.Semaphore(value=quantum)
+# if the number of blue threads are equal to the number of green threads,
+elif b == g:
+    # then default to blue
+    blue_semaphore = threading.Semaphore(value=quantum)
+    green_semaphore = threading.Semaphore(value=0)
 # else,
 else:
     print("Invalid input! There must be at least one green or blue thread!")
@@ -219,5 +224,5 @@ for i in range(b + g):
         green.start()
 
 # wait until the blue and green threads terminate
-# for thread in threads:
-#     thread.join()
+for thread in threads:
+    thread.join()
