@@ -29,7 +29,7 @@ def blue_enter():
     if not blue_room_mutex.locked():
         # acquire blue mutex lock
         blue_room_mutex.acquire()
-        # indicate that the waiting room is for blue threads only
+        # indicate that the fitting room is for blue threads only
         print("Blue only.")
 
     # request for access into the room
@@ -101,7 +101,7 @@ def green_enter():
     if not green_room_mutex.locked():
         # acquire green mutex lock
         green_room_mutex.acquire()
-        # indicate that the waiting room is for green threads only
+        # indicate that the fitting room is for green threads only
         print("Green only.")
 
     # request for access into the room
